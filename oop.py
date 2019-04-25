@@ -11,21 +11,28 @@ class List:
             self.name.append(item)
 
     def show(self):
+        totalCost = 0
         for item in self.name:
             print("{:<15} {:<15} {:<15} {:<15} {:<15} {:<15}".format(item.name,
                                                                      item.type_lesson,
                                                                      item.duration,
                                                                      item.paymentType,
                                                                      item.cost,
-                                                                     item.totalCost))
+                                                                     self.total_cost(item.duration, item.cost)))
+            totalCost += int(self.total_cost(item.duration, item.cost))
+        print("Итого: ", totalCost)
+
+    @staticmethod
+    def total_cost(duration, cost):
+        return duration * cost
 
 
 class Lesson:
-    def __init__(self, name, duration, paymentType, cost):
+    def __init__(self, name, paymentType, duration):
         self.__name = name
         self.__duration = duration
-        self.__paymentType = paymentType
-        self.__cost = cost
+        self.__paymentType = paymentType.type
+        self.__cost = paymentType.cost
         self.__type_lesson = None
 
     @property
@@ -68,33 +75,34 @@ class Lesson:
     def type_lesson(self, type_lesson):
         self.__type_lesson = type_lesson
 
+    def get_cost(self):
+        total_cost = self.duration * self.cost
+        return total_cost
+
+    def get_info(self):
+        print("{:<15} {:<15} {:<15} {:<15} {:<15} {:<15}".format(self.name,
+                                                                 self.type_lesson,
+                                                                 self.duration,
+                                                                 self.paymentType,
+                                                                 self.cost,
+                                                                 self.get_cost()))
+
 
 class Lecture(Lesson):
-    def __init__(self, name, duration, paymentType, cost, totalCost):
-        super(Lecture, self).__init__(name, duration, paymentType, cost)
+    def __init__(self, name, paymentType, duration):
+        super(Lecture, self).__init__(name, paymentType, duration)
         self.type_lesson = "Лекция"
-        self.totalCost = int(totalCost)
 
 
 class Seminar(Lesson):
-    def __init__(self, name, duration, paymentType, cost, totalCost):
-        super(Seminar, self).__init__(name, duration, paymentType, cost)
+    def __init__(self, name, paymentType, duration):
+        super(Seminar, self).__init__(name, paymentType, duration)
         self.type_lesson = "Семинар"
-        self.totalCost = int(totalCost)
 
 
 class Payment:
-    def __init__(self, cost, duration):
+    def __init__(self, cost):
         self.__cost = cost
-        self.__duration = duration
-
-    @property
-    def duration(self):
-        return self.__duration
-
-    @duration.setter
-    def duration(self, duration):
-        self.__duration = duration
 
     @property
     def cost(self):
@@ -106,41 +114,13 @@ class Payment:
 
 
 class TimePayment(Payment):
-    def __init__(self, cost, duration):
-        super(TimePayment, self).__init__(cost, duration)
+    def __init__(self, cost):
+        super(TimePayment, self).__init__(cost)
         self.type = "Повременная"
-
-    def totalCost(self):
-        totalCost = int(self.cost * self.duration)
-        return totalCost
-
-    def showConditions(self):
-        print("Стоимость занятия состовляет ", self.totalCost(), "в час")
 
 
 class FixedPayment(Payment):
-    def __init__(self, cost, duration):
-        super(FixedPayment, self).__init__(cost, duration)
+    def __init__(self, cost):
+        super(FixedPayment, self).__init__(cost)
         self.type = "Фиксированная"
-
-    def totalCost(self):
-        totalCost = str(self.totalCost)
-        return totalCost
-
-    def showConditions(self):
-        print("Стоимость занятия состовляет ", self.totalCost())
-
-
-list1 = List()
-hundred_per_hour = TimePayment(100, 10)
-hundred_per_lesson = FixedPayment(100, 1)
-hundred_per_hour.showConditions()
-
-html = Lecture("HTML",
-               hundred_per_hour.duration,
-               hundred_per_hour.type,
-               hundred_per_hour.cost,
-               hundred_per_hour.totalCost())
-
-list1.add(html)
-list1.show()
+        self.duration = 1
