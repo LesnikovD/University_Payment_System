@@ -18,22 +18,19 @@ class List:
                                                                      item.duration,
                                                                      item.paymentType,
                                                                      item.cost,
-                                                                     self.total_cost(item.duration, item.cost)))
-            totalCost += int(self.total_cost(item.duration, item.cost))
+                                                                     item.total))
+            totalCost += int(item.total)
         print("Итого: ", totalCost)
-
-    @staticmethod
-    def total_cost(duration, cost):
-        return duration * cost
 
 
 class Lesson:
-    def __init__(self, name, paymentType, duration):
+    def __init__(self, name, duration, cost, paymentType):
         self.__name = name
         self.__duration = duration
         self.__paymentType = paymentType.type
-        self.__cost = paymentType.cost
+        self.__cost = cost
         self.__type_lesson = None
+        self.total = paymentType.total(self.cost, self.duration)
 
     @property
     def name(self):
@@ -75,9 +72,13 @@ class Lesson:
     def type_lesson(self, type_lesson):
         self.__type_lesson = type_lesson
 
-    def get_cost(self):
-        total_cost = self.duration * self.cost
-        return total_cost
+    @property
+    def total(self):
+        return self.__total
+
+    @total.setter
+    def total(self, total):
+        self.__total = total
 
     def get_info(self):
         print("{:<15} {:<15} {:<15} {:<15} {:<15} {:<15}".format(self.name,
@@ -85,24 +86,25 @@ class Lesson:
                                                                  self.duration,
                                                                  self.paymentType,
                                                                  self.cost,
-                                                                 self.get_cost()))
+                                                                 self.total))
 
 
 class Lecture(Lesson):
-    def __init__(self, name, paymentType, duration):
-        super(Lecture, self).__init__(name, paymentType, duration)
+    def __init__(self, name, duration, cost, paymentType):
+        super(Lecture, self).__init__(name, duration, cost, paymentType)
         self.type_lesson = "Лекция"
 
 
 class Seminar(Lesson):
-    def __init__(self, name, paymentType, duration):
-        super(Seminar, self).__init__(name, paymentType, duration)
+    def __init__(self, name, duration, cost, paymentType):
+        super(Seminar, self).__init__(name, duration, cost, paymentType)
         self.type_lesson = "Семинар"
 
 
 class Payment:
-    def __init__(self, cost):
-        self.__cost = cost
+    def __init__(self):
+        self.__cost = 0
+        self.__duration = 0
 
     @property
     def cost(self):
@@ -112,15 +114,47 @@ class Payment:
     def cost(self, cost):
         self.__cost = cost
 
+    @property
+    def duration(self):
+        return self.__duration
+
+    @duration.setter
+    def duration(self, duration):
+        self.__duration = duration
+
+    def total(self, cost, duration):
+        return None
+
 
 class TimePayment(Payment):
-    def __init__(self, cost):
-        super(TimePayment, self).__init__(cost)
+    def __init__(self):
+        super(TimePayment, self).__init__()
         self.type = "Повременная"
+
+    def total(self, cost, duration):
+        return cost*duration
 
 
 class FixedPayment(Payment):
-    def __init__(self, cost):
-        super(FixedPayment, self).__init__(cost)
+    def __init__(self):
+        super(FixedPayment, self).__init__()
         self.type = "Фиксированная"
-        self.duration = 1
+
+    def total(self, cost, duration):
+        return cost
+
+
+tp = TimePayment()
+fp = FixedPayment()
+
+html = Lecture("HTML", 10, 900, tp)
+js = Seminar("JS", 10, 800, fp)
+css = Seminar("CSS", 10, 350, fp)
+php = Lecture("PHP", 10, 450, tp)
+
+list1 = List()
+list2 = List()
+list1.add(html, css)
+list2.add(html, css, js)
+
+list2.show()
